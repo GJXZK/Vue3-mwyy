@@ -6,7 +6,7 @@
     <van-popup
       v-model:show="show"
       closeable
-      :style="{ width: '100%', height: '100%' }"
+      :style="{ width: '100%', height: '100vh' }"
       position="right"
       close-icon-position="top-left"
     >
@@ -18,6 +18,14 @@
         :duration="state.duration"
         :isPlaying="isPlaying"
       />
+    </van-popup>
+    <van-popup
+      v-model:show="showList"
+      round
+      :style="{ width: '100%', height: '50vh' }"
+      position="bottom"
+      close-icon-position="top-left"
+    >
     </van-popup>
     <!-- 歌曲封面 歌曲名 歌手-->
     <div class="footerLeft" @click="showPopup">
@@ -39,7 +47,7 @@
         <use xlink:href="#icon-bofang1"></use>
       </svg>
 
-      <svg class="icon" aria-hidden="true">
+      <svg class="icon" aria-hidden="true" @click="showPopupList">
         <use xlink:href="#icon-liebiao1"></use>
       </svg>
     </div>
@@ -51,7 +59,7 @@
 import { reactive, ref } from "vue";
 import { mapMutations, mapState } from "vuex";
 import { reqMusicDetail } from "@/API/index";
-import PlayView from "@/components/PlayView.vue";
+import PlayView from "@/components/music/PlayView.vue";
 export default {
   name: "Footer",
   components: { PlayView },
@@ -63,13 +71,19 @@ export default {
       duration: 0,
     });
     const show = ref(false);
+    const showList=ref(false);
     const showPopup = () => {
       show.value = true;
     };
+    const showPopupList = () =>{
+      showList.value = true;
+    }
     return {
       state,
       show,
+      showList,
       showPopup,
+      showPopupList
     };
   },
   computed: {
@@ -79,6 +93,7 @@ export default {
       "playingMusicUrl",
       "playingMusicId",
       "isPlaying",
+      "ListMusicDetail",
     ]),
   },
   methods: {
@@ -118,8 +133,6 @@ export default {
     // 监听播放列表 如果播放列表发生变化
     playingMusicId: {
       handler(newValue, oldValue) {
-        console.log(newValue);
-        console.log(oldValue);
         if (newValue == oldValue) {
           this.$refs.audio.loop = true;
         } else {
@@ -127,6 +140,7 @@ export default {
           reqMusicDetail(this.state.playingId).then((res) => {
             this.state.musicPicUrl = res.songs[0].al.picUrl;
             this.state.playingMusic = res.songs[0];
+            console.log("正在播放   "+res.songs[0].name);
           });
           this.$store.dispatch("getPlayMuUrl", this.state.playingId);
           this.$refs.audio.autoplay = true;
@@ -138,6 +152,7 @@ export default {
   },
   mounted() {
     this.updateTime();
+    console.log(this.ListMusicDetail);
   },
 };
 </script>

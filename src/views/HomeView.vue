@@ -76,7 +76,6 @@ export default {
     // 调取api获取数据
     const getNewsList = () => {
       reqBannerList().then((res) => {
-        console.log(res.banners);
         state.list = res.banners;
       });
     };
@@ -85,9 +84,6 @@ export default {
     return {
       state,
     };
-  },
-  mounted() {
-    console.log(this.state.list);
   },
 };
 </script>

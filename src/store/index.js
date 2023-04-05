@@ -18,6 +18,9 @@ export default createStore({
         pushListMusicDetail:function(state,value){
             state.ListMusicDetail.unshift(value)
         },
+        updateListMusicDetail:function(state,value){
+            state.ListMusicDetail=value
+        },
         updatePlayListIndex: function (state, value) {
             state.playingIndex=value
         },
@@ -26,9 +29,6 @@ export default createStore({
         },
         updataPlayMusicId:function(state,value){
             state.playingMusicId=value
-            console.log("仓库改变");
-            console.log(state.musicList);
-            console.log(state.playingMusicId);
         },
         updataCurrentTime:function(state,value){
             state.currentTime=value

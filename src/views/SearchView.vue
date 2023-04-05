@@ -13,16 +13,64 @@
         type="text"
         placeholder="陈奕迅"
         v-model="state.keyword"
+        @click="historyShow()"
         @keydown.enter="enterKey"
       />
     </div>
   </div>
+  <!-- 分类 -->
+  <div class="classify">
+    <!-- 横向 手动 轮播  -->
+    <van-swipe
+      :loop="false"
+      :width="70"
+      class="my-swpie"
+      :show-indicators="false"
+    >
+    <!-- type: 搜索类型；默认为 1 即单曲 , 取值意义 : 1: 单曲, 10: 专辑, 100: 歌手, 1000: 歌单,
+     1002: 用户, 1004: MV, 1006: 歌词, 1009: 电台, 1014:
+      视频, 1018:综合, 2000:声音(搜索声音返回字段格式会不一样) -->
+      <van-swipe-item>
+        <div class="class" @click="SearchComprehensive">综合</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchSong">单曲</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchPlaylist">歌单</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchMV">MV</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchSinger">歌手</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchAlbum">专辑</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchLyrics">歌词</div>
+      </van-swipe-item>
+      <van-swipe-item>
+        <div class="class" @click="SearchUser">用户</div>
+      </van-swipe-item>      
+      <van-swipe-item>
+        <div class="class" @click="SearchVideo">视频</div>
+      </van-swipe-item>
+    </van-swipe>
+  </div>
   <!-- searchHistory -->
-  <div class="searchHistory">
+  <div class="searchHistory" v-show="state.historyShow">
     <!-- 文字 历史 -->
     <span class="history">历史</span>
     <!-- 搜索历史 -->
-    <span class="history-content" v-for="item in state.keyWorldList" @click="getSearch(item)"> {{ item}} </span>
+    <span
+      class="history-content"
+      v-for="item in state.keyWorldList"
+      @click="searchHistory(item)"
+    >
+      {{ item }}
+    </span>
     <!-- 删除 -->
     <svg class="delet" aria-hidden="true" @click="delHistory()">
       <use xlink:href="#icon-shanchu"></use>
@@ -30,30 +78,81 @@
   </div>
   <!-- 搜索结果 -->
   <div class="itemList">
-    <song v-for="(song,i) in state.searchList" :song="song" :i="i"></song>
+    <!-- 单曲 -->
+    <div class="songs">
+      <music
+        class="song"
+        v-for="(song, i) in state.song"
+        :song="song"
+        :i="i"
+      ></music>
+    </div>
+    <!-- 歌单 -->
+    <div class="playLists">
+      <playList class="playList" v-for="(item) in state.playList" :item="item"></playList>
+    </div>
   </div>
 </template>
 <script>
 import { reqSearchMusic } from "@/API/index";
 import { onMounted, reactive } from "vue";
-import song from "@/components/list/song.vue"
+import music from "@/components/list/music.vue";
+import playList from "@/components/list/playList"
 export default {
   name: "SearchView",
-  components:{song},
+  components: { music , playList},
   setup() {
     const state = reactive({
       keyword: "",
+      classifyId: 1018,
       historySearchList: [],
-      searchList: [],
       keyWorldList: [],
+      historyShow: true,
+      song: [],
+      playList:[],
     });
-    // 获取搜索结果
-    function getSearch(value) {
-      let data = state.keyword || value;
-      reqSearchMusic(data).then((res) => {
-        state.searchList = res.result.songs;
-        console.log(res.result.songs);
+    function historyShow() {
+      state.historyShow = true;
+    }
+    // 获取综合搜索结果
+    function SearchComprehensive() {
+      let data = state.keyword
+      reqSearchMusic(data, state.classifyId).then((res) => {
+        console.log(res);
+        state.song = res.result.song.songs;
+        state.playList=res.result.playList.playLists
+        state.historyShow = false;
       });
+    }
+    // 历史记录重新搜索
+    function searchHistory(value){
+      state.keyword=value
+      state.classifyId=1018
+      SearchComprehensive()
+    }
+    // 获取音乐搜索结果
+    function SearchSong(){
+      reqSearchMusic(state.keyword,1).then((res)=>{
+        console.log(res);
+        state.song = res.result.songs
+        state.playList=[]
+        console.log(state.playList);
+      }) 
+    }
+    // 获取歌单搜索结果
+    function SearchPlaylist(){
+      reqSearchMusic(state.keyword,1000).then((res)=>{
+        console.log(res);
+        state.playList=res.result.playlists
+        state.song=[]
+        console.log(state.playList);
+      })
+    }
+    // 获取歌词搜索结果
+    function SearchLyrics(){
+      reqSearchMusic(state.keyword,1006).then((res)=>{
+        console.log(res);
+      })
     }
     // 搜索键
     function enterKey() {
@@ -65,9 +164,12 @@ export default {
         if (state.keyWorldList.length > 10) {
           state.keyWorldList.splice(state.keyWorldList.length - 1, 1);
         }
-        localStorage.setItem("keyWorldList", JSON.stringify(state.keyWorldList));
-        getSearch();
-        state.keyword = "";
+        localStorage.setItem(
+          "keyWorldList",
+          JSON.stringify(state.keyWorldList)
+        );
+        SearchComprehensive()
+        state.historyShow = false;
       }
     }
     // 删除历史记录
@@ -75,19 +177,23 @@ export default {
       localStorage.removeItem("keyWorldList");
       state.keyWorldList = [];
     }
-    onMounted(()=>{
+    onMounted(() => {
       state.keyWorldList = JSON.parse(localStorage.getItem("keyWorldList"))
-      ? JSON.parse(localStorage.getItem("keyWorldList"))
-      : [];
-    })
+        ? JSON.parse(localStorage.getItem("keyWorldList"))
+        : [];
+    });
     return {
       state,
       enterKey,
       delHistory,
-      getSearch
+      historyShow,
+      SearchComprehensive,
+      searchHistory,
+      SearchSong,
+      SearchPlaylist,
+      SearchLyrics
     };
   },
-  
 };
 </script>
 <style lang="less" scoped>
@@ -106,6 +212,13 @@ export default {
       width: 90%;
       padding: 0.1rem;
     }
+  }
+}
+.classify {
+  width: 100%;
+  height: 5vh;
+  .class {
+    text-align: center;
   }
 }
 .searchHistory {
@@ -136,8 +249,33 @@ export default {
 }
 .itemList {
   width: 100%;
-  padding: 0.2rem;
   height: 75vh;
   overflow-y: scroll;
+  
+  .songs {
+    margin: 10px auto;
+    width: 90%;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    .song {
+      width: 80%;
+    }
+  }
+  .playLists{
+    margin: 20px auto;
+    width: 90%;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    overflow: hidden;
+    .playList{
+      width: 80%;
+    }
+  }
 }
 </style>

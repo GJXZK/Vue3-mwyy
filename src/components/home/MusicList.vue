@@ -48,7 +48,6 @@ export default {
     }
     const get = () => {
       reqPersonalized().then((res) => {
-        console.log(res.result);
         state.musicList = res.result;
       });
     };
@@ -118,7 +117,7 @@ export default {
         }
       }
       .name {
-        //   position: absolute;
+        color:rgb(37, 36, 36);
         bottom: 0px;
         overflow: hidden;
         text-overflow: ellipsis;

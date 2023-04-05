@@ -1,11 +1,11 @@
 <template>
   <div class="item">
-    <!-- 结果标记 -->
-    <span>{{ i + 1 }}</span>
+    <!-- 结果标记 歌手名 ar -->
+    <!-- <span>{{ i + 1 }}</span> -->
     <!-- 歌曲名 歌手  -->
     <div class="songInfo" @click="playMusicSon(song)">
       <div class="song-name">{{ song.name }}</div>
-      <div class="singer">{{ song.ar[0].name }}</div>
+      <div class="singer">{{ name}}</div>
     </div>
     <div class="others">
       <!-- MV  有mv就显示 没有不显示 -->
@@ -27,13 +27,30 @@
 </template>
 
 <script>
+import { reactive } from 'vue';
 export default {
   props: ["song", "i"],
+  setup(){
+    const state=reactive({
+      name:""
+    })
+    return {state}
+  },
+  computed:{
+    name(){
+      if('ar' in this.song){
+        return this.song.ar[0].name
+      }else{
+        return this.song.artists[0].name
+      }
+    }
+  },
   methods: {
     playMusicSon(song) {
       this.$store.commit("updataPlayMusicId", song.id);
       this.$store.commit("updateisPlaying", true);
       this.$store.commit("pushMusicList", song.id);
+      console.log("播放歌曲    "+song.name);
     },
   },
 };
@@ -62,6 +79,7 @@ export default {
     position: absolute;
     right: 0.1rem;
     width: 1.2rem;
+    height: 100%;
     .song-mv {
       position: absolute;
       left: 0px;

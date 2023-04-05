@@ -5,7 +5,7 @@
   <!-- 主体显示区域 -->
   <!-- 默认界面发现音乐 搜索界面 seeting界面 个人界面 -->
   <router-view></router-view>
-  <Footer></Footer>
+  <Footer v-show="$route.meta.FooterShow"></Footer>
 </template>
 
 <script>

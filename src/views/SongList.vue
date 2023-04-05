@@ -24,7 +24,7 @@
       <div class="listInfo">
         <div class="name">{{ state.detail.name }}</div>
         <div class="artist">
-          xzkk
+          {{ state.detail.creator.nickname }}
         </div>
       </div>
     </div>
@@ -36,7 +36,7 @@
   <!-- 歌单操作  播放全部 -->
   <div class="control">
     <!-- playAll -->
-    <div class="playAll">
+    <div class="playAll" @click="playAll">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-bofang1"></use>
       </svg>
@@ -44,21 +44,28 @@
     </div>
   </div>
   <!-- 歌单歌曲 -->
-  <div class="playList">
-    <music v-for="(song, i) in state.songs" :song="song" :i="i"></music>
+  <div class="playListbox">
+    <div class="playList">
+      <music
+        class="music"
+        v-for="(song, i) in state.songs"
+        :song="song"
+        :i="i"
+      ></music>
+    </div>
   </div>
 </template>
 <script>
 import { reqSongListDetail, reqSongList } from "@/API/index";
 import { reactive } from "vue";
-import music from "@/components/list/music.vue"
+import music from "@/components/list/music.vue";
 export default {
   name: "playList",
-  components:{music},
+  components: { music },
   setup() {
     const state = reactive({
       songs: [],
-      detail: {},
+      detail: { creator: { nickname: "xzk" } },
     });
     function changeCount(num) {
       if (num >= 100000000) {
@@ -72,27 +79,23 @@ export default {
       changeCount,
     };
   },
+  methods: {
+    playAll(){
+      this.$state.updateListMusicDetail(this.state.songs)
+    }
+  },
   mounted() {
     // 获取歌单详情
     reqSongListDetail(this.$route.query.id).then((res) => {
       this.state.detail = res.playlist;
-      // console.log(this.state.detail);
+      console.log(this.state.detail.name);
     });
     // 获取歌单音乐列表
     reqSongList(this.$route.query.id).then((res) => {
       this.state.songs = res.songs;
-      // console.log(this.state.songs);
+      // console.log(this.state.detail.creator.nickname);
     });
-    
   },
-  methods:{
-    playMusicSon(song){
-      this.$store.commit("updataPlayMusicId",song.id)
-      this.$store.commit("updateisPlaying",true)
-      this.$store.commit("pushMusicList",song.id)
-      this.$store.commit("")
-    }
-  }
 };
 </script>
 
@@ -110,7 +113,7 @@ export default {
       margin: auto;
     }
   }
-  span{
+  span {
     font-size: 24px;
     font-weight: 600;
   }
@@ -120,16 +123,16 @@ export default {
   height: 20vh;
   .info {
     width: 100%;
-    height: 15vh;
+    height: 16vh;
     display: flex;
+    margin: 0 10px;
     .coverImg {
       position: relative;
-      width: 2.5rem;
-      height: 2.5rem;
-      display: flex;
+      width: 178px;
+      height: 145px;
       border-radius: 10%;
       overflow: hidden;
-      margin:0 10px;
+
       img {
         margin: auto;
         width: 100%;
@@ -144,11 +147,11 @@ export default {
       }
     }
     .listInfo {
-      .name{  
+      .name {
         font-size: 20px;
       }
-      .artist{
-        padding: 10px ;
+      .artist {
+        padding: 10px;
       }
     }
   }
@@ -163,8 +166,8 @@ export default {
   height: 7vh;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, .3);
-  .playAll{
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  .playAll {
     height: 60%;
     display: flex;
     align-items: center;
@@ -172,20 +175,30 @@ export default {
     background-color: rgb(240, 238, 238);
     margin: 0 20px;
     padding: 5px;
-    .icon{
+    .icon {
       width: 0.6rem;
       padding: 0 5px;
-      
     }
-    span{
+    span {
       padding: 0px 5px;
     }
   }
 }
-.playList {
+.playListbox {
   width: 100%;
   height: 55vh;
-  overflow: scroll;
-  padding: 0.2rem;
+  overflow-y: scroll;
+  .playList {
+    margin: 10px auto;
+    width: 90%;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    .music {
+      width: 90%;
+    }
+  }
 }
 </style>
