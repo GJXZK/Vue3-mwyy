@@ -34,7 +34,7 @@ export function reqSongListDetail(data){
 export function reqSongList(data){
     return requests({
         method:"GET",
-        url:`/playlist/track/all?id=${data}&limit=20&offset=1`
+        url:`/playlist/track/all?id=${data}`
     })
 }
 // 获取歌词

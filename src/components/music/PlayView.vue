@@ -74,6 +74,7 @@
     <div class="progress">
       <input
         ref="progress"
+        id="progress"
         type="range"
         class="range"
         min="0"
@@ -139,9 +140,10 @@ export default {
     "next",
     "duration",
     "isPlaying",
+    "updateAudioTime"
   ],
   computed: {
-    ...mapState(["currentTime", "playingMusicId", "lyricList"]),
+    ...mapState(["currentTime", "playingMusicId","musicList", "lyricList"]),
     lyric: function () {
       let arr;
       if (this.lyricList.lyric) {
@@ -174,8 +176,8 @@ export default {
   },
   methods: {
     changeBar() {
-      console.log(refs);
-      console.log("changeBar");
+      let range=document.getElementById('progress')
+      this.updateAudioTime(range.value)
     },
     inputBar() {
       console.log("inputBar");
@@ -195,7 +197,7 @@ export default {
         }
       }
       if (newValue === this.duration) {
-        if (this.playListIndex === this.playList.length - 1) {
+        if (this.playListIndex === this.musicList.length - 1) {
           this.updatePlayListIndex(0);
           this.play();
         } else {
@@ -212,7 +214,7 @@ export default {
 <style lang="less" scoped>
 .musicBox {
   width: 100%;
-  height: 100vh;
+  // height: 100vh;
   position: relative;
   .bg-blur{
     position: absolute;
@@ -303,7 +305,7 @@ export default {
     align-items: center;
     overflow: scroll;
     p {
-      color: rgb(190, 181, 181);
+      color: rgb(255, 254, 254);
       margin-bottom: 0.3rem;
     }
     .active {

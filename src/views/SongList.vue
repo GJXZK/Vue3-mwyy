@@ -30,7 +30,11 @@
     </div>
     <!-- 歌单介绍 -->
     <div class="introduce">
-      <van-text-ellipsis :content="state.detail.description" />
+      <van-text-ellipsis 
+        :content="state.detail.description" 
+        rows="1"
+        expand-text="展开" 
+        collapse-text="收起"  />
     </div>
   </div>
   <!-- 歌单操作  播放全部 -->
@@ -80,9 +84,23 @@ export default {
     };
   },
   methods: {
-    playAll(){
-      this.$state.updateListMusicDetail(this.state.songs)
-    }
+    playAll() {
+      // 将歌单songs中的部分信息存入仓库
+      let song={}
+      for (song of this.state.songs) {
+        let songDetail = {
+          mname: song.name,
+          aname: song.ar[0].name,
+          songid: song.id,
+        };
+        // 添加到播放列表
+        this.$store.commit("pushMusicList", song.id);
+        this.$store.commit("pushListMusicDetail", songDetail);
+      }
+      // 点击播放全部后 添加所有的歌曲到列表 默认播放第一首歌
+      this.$store.commit("updataPlayMusicId", song.id);
+      this.$store.commit("updateisPlaying", true);
+    },
   },
   mounted() {
     // 获取歌单详情
@@ -93,7 +111,6 @@ export default {
     // 获取歌单音乐列表
     reqSongList(this.$route.query.id).then((res) => {
       this.state.songs = res.songs;
-      // console.log(this.state.detail.creator.nickname);
     });
   },
 };
@@ -129,7 +146,7 @@ export default {
     .coverImg {
       position: relative;
       width: 178px;
-      height: 145px;
+      height: 123px;
       border-radius: 10%;
       overflow: hidden;
 
@@ -140,7 +157,7 @@ export default {
       .playCount {
         font-size: 14px;
         position: absolute;
-        z-index: 100;
+        // z-index: 0;
         right: 0.2rem;
         color: white;
         margin-top: 0.06rem;
@@ -148,6 +165,7 @@ export default {
     }
     .listInfo {
       .name {
+        padding: 10px;
         font-size: 20px;
       }
       .artist {
@@ -189,7 +207,7 @@ export default {
   height: 55vh;
   overflow-y: scroll;
   .playList {
-    margin: 10px auto;
+    margin: 0 auto;
     width: 90%;
     background-color: #ccc;
     display: flex;

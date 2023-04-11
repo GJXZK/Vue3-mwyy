@@ -4,13 +4,21 @@
     <!-- <span>{{ i + 1 }}</span> -->
     <!-- 歌曲名 歌手  -->
     <div class="songInfo" @click="playMusicSon(song)">
-      <div class="song-name">{{ song.name }}</div>
-      <div class="singer">{{ name}}</div>
+      <!-- <div class="song-name">{{ song.name }}</div>
+      <div class="singer">{{ name}}</div> -->
+      <van-text-ellipsis :content="musictext"
+        rows="1"
+      />
     </div>
     <div class="others">
       <!-- MV  有mv就显示 没有不显示 -->
-      <div class="song-mv" v-show="song.mvid">
-        <router-link to="/MV">
+      <div class="song-mv" v-show="mvid">
+        <router-link :to="{
+          path:'MV',
+          query:{
+            mvid:mvid
+          }
+        }">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-mv1"></use>
           </svg>
@@ -29,10 +37,10 @@
 <script>
 import { reactive } from 'vue';
 export default {
-  props: ["song", "i"],
+  props: ["song"],
   setup(){
     const state=reactive({
-      name:""
+      name:"",
     })
     return {state}
   },
@@ -43,13 +51,28 @@ export default {
       }else{
         return this.song.artists[0].name
       }
+    },
+    musictext(){
+      return this.song.name+"-"+this.name
+    },
+    mvid(){
+      if('mv' in this.song){
+        return this.song.mv
+      }else{
+        return this.song.mvid
+      }
     }
   },
   methods: {
     playMusicSon(song) {
+      console.log(song);
       this.$store.commit("updataPlayMusicId", song.id);
       this.$store.commit("updateisPlaying", true);
       this.$store.commit("pushMusicList", song.id);
+      console.log(song);
+      let songDetail={mname:this.song.name,aname:this.name,songid:this.song.id}
+      console.log(songDetail);
+      this.$store.commit("pushListMusicDetail",songDetail)
       console.log("播放歌曲    "+song.name);
     },
   },
@@ -66,14 +89,16 @@ export default {
     width: 0.6rem;
   }
   .songInfo {
-    .song-name {
-      font-size: 18px;
-      font-weight: 560;
-    }
-    .singer {
-      font-size: 10px;
-      font-weight: 300;
-    }
+    // .song-name {
+    //   font-size: 18px;
+    //   font-weight: 560;
+    // }
+    // .singer {
+    //   font-size: 10px;
+    //   font-weight: 300;
+    // }
+    width: 200px;
+    height: 30px;
   }
   .others {
     position: absolute;
@@ -83,11 +108,15 @@ export default {
     .song-mv {
       position: absolute;
       left: 0px;
+      height: 1.2rem;
+      line-height: 1.6rem;
       .icon {
         width: 20px;
       }
     }
     .more {
+      height: 1.2rem;
+      line-height: 1.6rem;
       position: absolute;
       right: 0px;
       .icon {

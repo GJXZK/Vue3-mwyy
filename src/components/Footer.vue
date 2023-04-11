@@ -17,15 +17,18 @@
         :next="next"
         :duration="state.duration"
         :isPlaying="isPlaying"
+        :updateAudioTime="updateAudioTime"
       />
     </van-popup>
+    <!-- 弹出框  播放列表 -->
     <van-popup
       v-model:show="showList"
       round
-      :style="{ width: '100%', height: '50vh' }"
+      :style="{ width: '100%', height: '60vh' }"
       position="bottom"
       close-icon-position="top-left"
     >
+      <ListMusicDetail></ListMusicDetail>
     </van-popup>
     <!-- 歌曲封面 歌曲名 歌手-->
     <div class="footerLeft" @click="showPopup">
@@ -52,7 +55,10 @@
       </svg>
     </div>
     <!-- 播放器 -->
-    <audio ref="audio" :src="playingMusicUrl" @ended="next(1)"></audio>
+    <audio ref="audio" 
+      :src="playingMusicUrl" 
+      @ended="next(1)"
+      @canplay="canplaysong"></audio>
   </div>
 </template>
 <script>
@@ -60,9 +66,10 @@ import { reactive, ref } from "vue";
 import { mapMutations, mapState } from "vuex";
 import { reqMusicDetail } from "@/API/index";
 import PlayView from "@/components/music/PlayView.vue";
+import ListMusicDetail from "./footer/ListMusicDetail.vue";
 export default {
   name: "Footer",
-  components: { PlayView },
+  components: { PlayView ,ListMusicDetail},
   setup() {
     const state = reactive({
       playingId: "",
@@ -128,6 +135,12 @@ export default {
         this.updataCurrentTime(this.$refs.audio.currentTime);
       }, 1000);
     },
+    updateAudioTime:function(value){
+      // this.$refs.audio.currentTime=value
+    },
+    canplaysong(){
+      this.state.duration=this.$refs.audio.duration
+    }
   },
   watch: {
     // 监听播放列表 如果播放列表发生变化
@@ -138,13 +151,13 @@ export default {
         } else {
           this.state.playingId = newValue;
           reqMusicDetail(this.state.playingId).then((res) => {
+            console.log(res);
             this.state.musicPicUrl = res.songs[0].al.picUrl;
             this.state.playingMusic = res.songs[0];
             console.log("正在播放   "+res.songs[0].name);
           });
           this.$store.dispatch("getPlayMuUrl", this.state.playingId);
           this.$refs.audio.autoplay = true;
-          this.state.duration = this.$refs.audio.duration;
         }
       },
       deep: true,
@@ -158,7 +171,8 @@ export default {
 </script>
 <style lang="less" scoped>
 .FooterMusic {
-  position: relative;
+  position: sticky;
+  // position: relative;
   bottom: 0px;
   width: 100%;
   height: 10vh;
