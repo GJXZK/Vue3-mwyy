@@ -1,19 +1,9 @@
-# m_wyy_vue3
+移动端网易云音乐项目
 
-## Project setup
-```
+后端文件NeteaseCloudMusicApi-master
+在终端中打开执行 node.app.js 
+
+Vue项目
 npm install
-```
 
-### Compiles and hot-reloads for development
-```
 npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
